@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1496409706 source:f:\proj\neural network\main.cpp
+	<iostream>
+
+1496411394 source:f:\proj\neural network\src\neuralnetwork.cpp
+	"NeuralNetwork.h"
+
+1496414738 f:\proj\neural network\include\neuralnetwork.h
+	"Database.h"
+
+1496410456 source:f:\proj\neural network\src\aprentissage.cpp
+	"Aprentissage.h"
+
+1496416116 f:\proj\neural network\include\aprentissage.h
+	"NeuralNetwork.h"
+
+1496414738 f:\proj\neural network\include\database.h
+
+1496412320 source:f:\proj\neural network\src\database.cpp
+	"Database.h"
+
