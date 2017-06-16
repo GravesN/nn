@@ -34,13 +34,13 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="include/Aprentissage.h" />
-		<Unit filename="include/Database.h" />
-		<Unit filename="include/NeuralNetwork.h" />
+		<Unit filename="Aprentissage.cpp" />
+		<Unit filename="Aprentissage.h" />
+		<Unit filename="Database.cpp" />
+		<Unit filename="Database.h" />
+		<Unit filename="NeuralNetwork.cpp" />
+		<Unit filename="NeuralNetwork.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="src/Aprentissage.cpp" />
-		<Unit filename="src/Database.cpp" />
-		<Unit filename="src/NeuralNetwork.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />
