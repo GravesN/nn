@@ -3,42 +3,50 @@
 
 #include "NeuralNetwork.h"
 
+
 class Aprentissage
 {
-    typedef double(*Fonction)(double);
+
     public:
-        Aprentissage();
+        Aprentissage(std::string trucPourData);//je sais pas encore quoi
         ~Aprentissage();
 
         void learn();
-        void backpropagation();
-
-
+        double validation();
+        double test();
 
     private:
 
         void createNeuralNetwork();
+        void setParameter();
+        inline void feedForward();
+        inline void calculOutputError();
+        inline void backpropagation();
+        inline void gradientDescend();
 
-        int m_nbINeurons;
-        int m_nbONeurons;
-        int m_nbHNeurons;
+        int m_nbNetwork;
+        int m_nbEpoch;//peut utilier un arret si plus de progression
 
-        double m_learningRate;
-        int m_numberEpoch;
+        double *m_learningRate=0;//plus rapide pour les couche profondent car apprennent moin vite
+        int m_miniBatchSize=1;//peut changer au cours du temp de + en+ gros pour aprendre vite au debut puis mieux converger
 
-        int m_miniBatchSize;//=n pour pas la
         double m_lambdaL1=0;
-        double m_lambdaL2=0;//egal les deux?
+        double m_lambdaL2=0;
         //dropout
-        double m_momentumCoeff=0;
+        //double m_momentumCoeff=0;
 
-        Fonction fonctionActivation=0;
-        Fonction costFunction=0;
+        ActFunction *m_actFunction=0;
+        CostFunction *m_costFunction=0;
 
         NeuralNetwork* m_neuralNetwork=0;
 
-        Database* m_learningData;
-        Database* m_validationData;//peut etre plus haut
+        Database m_Data;
+
+        int m_nbTrainingExemple;
+        int m_nbLayer;
+        int *nbNeuron=0;
+
+        Eigen::MatrixXd *m_error=0;
 
 };
 

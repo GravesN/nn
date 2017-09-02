@@ -40,6 +40,8 @@
 		<Unit filename="Database.h" />
 		<Unit filename="NeuralNetwork.cpp" />
 		<Unit filename="NeuralNetwork.h" />
+		<Unit filename="fonctions.cpp" />
+		<Unit filename="fonctions.h" />
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

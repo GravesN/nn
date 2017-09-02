@@ -19,3 +19,36 @@
 1496412320 source:f:\proj\neural network\src\database.cpp
 	"Database.h"
 
+1504114440 source:d:\projet\nn-master\aprentissage.cpp
+	"Aprentissage.h"
+
+1504139035 d:\projet\nn-master\aprentissage.h
+	"NeuralNetwork.h"
+
+1504055282 d:\projet\nn-master\neuralnetwork.h
+	"Database.h"
+	<functional>
+	<random>
+	"fonctions.h"
+
+1504114440 d:\projet\nn-master\database.h
+	<Eigen/Dense>
+	<string>
+
+1504114440 source:d:\projet\nn-master\database.cpp
+	"Database.h"
+
+1504139319 source:d:\projet\nn-master\main.cpp
+	<iostream>
+	"fonctions.h"
+
+1504059965 source:d:\projet\nn-master\neuralnetwork.cpp
+	"NeuralNetwork.h"
+
+1504060234 source:d:\projet\nn-master\fonctions.cpp
+	"fonctions.h"
+
+1503975056 d:\projet\nn-master\fonctions.h
+	<cmath>
+	<Eigen/Core>
+

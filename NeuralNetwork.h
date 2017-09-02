@@ -2,37 +2,33 @@
 #define NEURALNETWORK_H
 
 #include "Database.h"
+#include <functional>
+#include <random>
+#include "fonctions.h"
 
 class Aprentissage;
 class NeuralNetwork
 {
     friend class Aprentissage;
 
-    typedef double(*Fonction)(double);
-
     public:
-        NeuralNetwork();
+        NeuralNetwork(std::string fileAdress);//construit un réseau à partir d'un fichier (déja entrainé à priori)
+        NeuralNetwork(int nbLayer,int nbNeuron[],ActFunction *actFunction,int nbDataParCalcul=1);//construit un réseau aà partir des données fournie (non entrainé à priori)
         ~NeuralNetwork();
-        double use(double T);
-
+        Eigen::MatrixXd use(Eigen::MatrixXd input);
 
     private:
 
-        const int m_nbINeurons=0;
-        const int m_nbONeurons=0;
-        const int m_nbHNeurons=0;
+        void initvalue();
+        inline void calculLayer(int number);
 
-        double Tm_iNeurons;
-        double Tm_oNeurons;
-        double T2m_hNeurons;
+        int m_nbLayer;
 
-        double T2m_oweight;
-        double T3m_hweight;
+        Eigen::MatrixXd *m_layer=0;
+        Eigen::MatrixXd *m_weight=0;
+        Eigen::VectorXd *m_bias=0;
 
-        double T2m_obias;
-        double T3m_hbias;
-
-        Fonction fonctionActivation=0;
+        ActFunction *m_actFunction=0;
 };
 
 #endif // NEURALNETWORK_H
