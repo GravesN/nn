@@ -5,7 +5,7 @@ NeuralNetwork::NeuralNetwork(std::string fileAdress)
 
 }
 
-NeuralNetwork::NeuralNetwork(int nbLayer,int nbNeuron[],ActFunction *actFunction,int nbDataParCalcul)
+NeuralNetwork::NeuralNetwork(int nbLayer,int *nbNeuron,ActFunction *actFunction,int nbDataParCalcul)
 {
     m_nbLayer=nbLayer;
 

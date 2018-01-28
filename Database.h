@@ -3,20 +3,21 @@
 
 #include <Eigen/Dense>
 #include <string>
+#include <iostream>
 
 class Database
 {
-    public:
-        Database(std::string trucPourData);
-        virtual ~Database();
+public:
+    Database(std::string trucPourData);
+    virtual ~Database();
 
-    private:
-        Eigen::matrixXd m_trainingData;
-        Eigen::matrixXd m_resultTrainingData;
-        Eigen::matrixXd m_validationData;
-        Eigen::matrixXd m_resultValidationData;
-        Eigen::matrixXd m_testData;
-        Eigen::matrixXd m_resultTestData;
+private:
+    Eigen::MatrixXd m_trainingData;
+    Eigen::MatrixXd m_resultTrainingData;
+    Eigen::MatrixXd m_validationData;
+    Eigen::MatrixXd m_resultValidationData;
+    Eigen::MatrixXd m_testData;
+    Eigen::MatrixXd m_resultTestData;
 
 };
 

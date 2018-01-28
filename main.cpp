@@ -1,11 +1,12 @@
 #include <iostream>
 #include "fonctions.h"
 
-using namespace Eigen;
-using namespace std;
-
 int main()
 {
-
+    int *i{0};
+    int u{1};
+    i= &u;
+    i=new int(3);
+    delete i;
     return 0;
 }
