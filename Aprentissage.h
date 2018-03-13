@@ -32,7 +32,7 @@ private:
         double validation();
     private:
 
-
+        //ces fonctions là ne sont pas encore écrites du coup
         inline void feedForward();
         inline void calculOutputError();
         inline void backpropagation();
