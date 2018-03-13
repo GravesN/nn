@@ -1,0 +1,22 @@
+type(tout attaché majuscule entre les mots)
+n taille de l'entrée
+m taille de la sortie
+a nombre entrainement
+b nombre validation
+c nombre test
+
+x11 x12  ... x1n y11 y12 ... y1m
+.
+. 
+.
+xa1 xa2 ... xan ya1 ya2 ... yam
+x(a+1)1 x(a+1)2 ... x(a+1)n y(a+1)1 y(a+1)2 ... y(a+1)m
+.
+.
+.
+x(a+b)1 x(a+b)2 ... x(a+b)n y(a+b)1 y(a+b)2 ... y(a+b)m
+x(a+b+1)1 x(a+b+1)2 ... x(a+b+1)n y(a+b+1)1 y(a+b+1)2 ... y(a+b+1)m
+.
+.
+.
+x(a+b+c)1 x(a+b+c)2 ... x(a+b+c)n y(a+b+c)1 y(a+b+c)2 ... y(a+b+c)m

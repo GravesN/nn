@@ -8,47 +8,66 @@ class Aprentissage
 {
 
 public:
-    Aprentissage();
+    Aprentissage(std::string dataAdress, int nbNetwork, int nbTread); //c'est quoi nbTread ? (thread : processus d'exécution)
     ~Aprentissage();
     void learn();
-
+    double test();
 private:
-    double test(int i);
-    double validation(int i);
-    void trainNetwork(int i);
-    void createNeuralNetwork(int i);
-    void setParameters(int i);
-    double askParameter(std::string nom, double valeurMin=0, double valeurMax=0, double defaultValue=0, std::string textSup="");
-    inline void feedForward(int i);
-    inline void calculOutputError(int i);
-    inline void backpropagation(int i);
-    inline void gradientDescend(int i);
+    void createDataBase(std::string type, std::string dataAddress);
+    void setParameters();
 
     int m_nbNetwork{1};
     int m_nbTread{1};
-    int *m_nbEpoch{0};//peut utilier un arret si plus de progression
-    std::thread* threads{0};
 
-    double **m_learningRate{0};//plus rapide pour les couche profondent car apprennent moin vite
-    int *m_miniBatchSize{0};//peut changer au cours du temps de + en+ gros pour aprendre vite au debut puis mieux converger
+    Database *m_data{0};//pointeur pour pouvoir utiliser le polymorphisme avec l'héritage // ?
+    int const* m_nbTestExemple{0};//pointeur constant car c'est celui de m_data
 
-    double *m_lambdaL1{0};
-    double *m_lambdaL2{0};
-    //dropout
-    //double *m_momentumCoeff{0};
+    class TrainSet
+    {
+    public:
+        TrainSet();
+        ~TrainSet();
+        void init(Database const* data);
+        void trainNetwork();
+        double validation();
+    private:
 
-    ActFunction **m_actFunction{0};
-    CostFunction *m_costFunction{0};
 
-    NeuralNetwork* m_neuralNetwork{0};
+        inline void feedForward();
+        inline void calculOutputError();
+        inline void backpropagation();
+        inline void gradientDescend();
 
-    Database *m_Data{0};
+        void resizeMiniBatch(int miniBatchSize);//batch ?
 
-    int m_nbTrainingExemple;
-    int *m_nbLayer{0};
-    int **nbNeuron{0};
+        int m_nbLayer;
+        int *m_nbNeuron{0};//un tableau de taille m_nbLayer
 
-    Eigen::MatrixXd **m_error{0};
+        CostFunction *m_costFunction{0};//pointeur pour pouvoir choisir la classe (qui correspond à la fonction)
+        ActFunction **m_actFunction{0};//comme pour cos mais en plus c'est un tableau donc pointeur sur pointeur du coup il faut faire new[] puis new sur chaque element
+
+        double *m_learningRate{0};//plus rapide pour les couches profondes car elles apprennent moins vite
+        int m_miniBatchSize;//peut changer au cours du temps de + en+ gros pour apprendre vite au début puis mieux converger
+
+        Eigen::MatrixXd *m_sortieAttendue{0};//là c'est un pointeur juste pour l'initialiser quand on veut ça pourrait ne pas l'être
+        Eigen::MatrixXd *m_error{0};//un tableau de taille m_nbLayer l'erreur pour la couche i a l'indice i
+        NeuralNetwork *m_neuralNetwork{0};//c'est un pointeur pour l'initialiser quand on veut mais c'est plus utile que pour m_sortieAttendue car NeuralNetwork n'a pas de constructeur par défaut
+
+        int m_nbEpoch;//le nombre de parcours des exemples
+        double m_lambdaL1;//facteur pour la régularisaton L1 comme si pas la pour =0
+        double m_lambdaL2;//facteur pour la régularisaton L2 comme si pas la pour =0
+
+
+        //les trois là sont des pointeurs et constant car ils sont identiques pour tout les TrainSet
+        Database const* m_data{0};
+        int const* m_nbTrainingExemple{0};
+        int const* m_nbValidationExemple{0};
+
+
+    };
+
+    TrainSet *m_bestTrainSet{0};//pointeur vers le meilleur
+    int m_bestValidation{0}; //ce que renvoie m_bestTrainSet->validation()
 
 };
 

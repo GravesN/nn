@@ -19,38 +19,41 @@
 1496412320 source:f:\proj\neural network\src\database.cpp
 	"Database.h"
 
-1516542288 source:d:\projet\nn-master\aprentissage.cpp
+1519597084 source:d:\projet\nn-master\aprentissage.cpp
 	"Aprentissage.h"
 
-1516541512 d:\projet\nn-master\aprentissage.h
+1519597084 d:\projet\nn-master\aprentissage.h
 	"NeuralNetwork.h"
 	<thread>
 
-1516541404 d:\projet\nn-master\neuralnetwork.h
+1519598367 d:\projet\nn-master\neuralnetwork.h
 	"Database.h"
 	<functional>
 	<random>
 	"fonctions.h"
 
-1516541404 d:\projet\nn-master\database.h
+1519588628 d:\projet\nn-master\database.h
 	<Eigen/Dense>
 	<string>
 	<iostream>
+	<fstream>
+	<cstdlib>
+	<ctime>
 
-1504110840 source:d:\projet\nn-master\database.cpp
+1519503987 source:d:\projet\nn-master\database.cpp
 	"Database.h"
 
-1516311129 source:d:\projet\nn-master\main.cpp
+1519162694 source:d:\projet\nn-master\main.cpp
 	<iostream>
 	"fonctions.h"
 
-1504056365 source:d:\projet\nn-master\neuralnetwork.cpp
+1519579732 source:d:\projet\nn-master\neuralnetwork.cpp
 	"NeuralNetwork.h"
 
-1504056634 source:d:\projet\nn-master\fonctions.cpp
+1519598290 source:d:\projet\nn-master\fonctions.cpp
 	"fonctions.h"
 
-1516541404 d:\projet\nn-master\fonctions.h
+1519598290 d:\projet\nn-master\fonctions.h
 	<cmath>
 	<Eigen/Core>
 
