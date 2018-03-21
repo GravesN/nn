@@ -16,14 +16,13 @@ public:
     NeuralNetwork(int nbLayer,int *nbNeuron,ActFunction **actFunction,int nbDataParCalcul=1);//construit un réseau à partir des données fournies (non entrainé à priori)
     ~NeuralNetwork();
     Eigen::MatrixXd const& use(Eigen::MatrixXd const&input);
-    SaveNeuralNetwork(std::string fileAddress,int nbLayer, ActFunction actFunction,Eigen::MatrixXd layer,Eigen::MatrixXd weight, Eigen::MatrixXd bias);
-    // fonction pour enregistrer le réseau, mais même problème, comprend-il que ce sont des matrices de matrices ?
+
 private:
 
     void initvalue();
     void calcul();
     inline void calculLayer(int number);
-
+    void SaveNeuralNetwork(std::string fileAddress);
 
     int m_nbLayer;
 

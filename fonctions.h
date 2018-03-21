@@ -20,7 +20,7 @@ public:
     virtual ~Sigmoid(){}
 };
 
-class SoftMax: public ActFunction // distribution de probabilité bien pour lesneuronnes de sortie pour un probleme de classification avec log_likelihood cost
+class SoftMax: public ActFunction // distribution de probabilité bien pour les neuronnes de sortie pour un probleme de classification avec log_likelihood cost
 {
 public:
     virtual Eigen::MatrixXd const operator() (Eigen::MatrixXd const&mat);//peut ajouter petit +ax pour eviter des lieux plats

@@ -8,7 +8,7 @@ class Aprentissage
 {
 
 public:
-    Aprentissage(std::string dataAdress, int nbNetwork, int nbTread); //c'est quoi nbTread ? (thread : processus d'exécution)
+    Aprentissage(std::string dataAdress, int nbNetwork, int nbTread); // (thread : processus d'exécution)
     ~Aprentissage();
     void learn();
     double test();
@@ -22,6 +22,19 @@ private:
     Database *m_data{0};//pointeur pour pouvoir utiliser le polymorphisme avec l'héritage // ?
     int const* m_nbTestExemple{0};//pointeur constant car c'est celui de m_data
 
+    int m_nbLayer;
+    int *m_nbNeuron{0};
+    CostFunction *m_costFunction{0};
+    ActFunction **m_actFunction{0};
+    double *m_learningRate{0};
+    int m_miniBatchSize;
+    int m_nbEpoch;
+    double m_lambdaL1;
+    double m_lambdaL2;
+    void choisirCostFunction();
+    void choisirActFunction();
+    void choisir(std::string texte, int entier);
+    void choisir(std::string texte, double flottant);
     class TrainSet
     {
     public:
@@ -32,22 +45,27 @@ private:
         double validation();
     private:
 
-        //ces fonctions là ne sont pas encore écrites du coup
+
         inline void feedForward();
         inline void calculOutputError();
         inline void backpropagation();
         inline void gradientDescend();
 
-        void resizeMiniBatch(int miniBatchSize);//batch ?
+        void resizeMiniBatch(int miniBatchSize);
 
         int m_nbLayer;
+        int borneInfInt;
+        int borneSupInt;
         int *m_nbNeuron{0};//un tableau de taille m_nbLayer
+        int indice;
 
         CostFunction *m_costFunction{0};//pointeur pour pouvoir choisir la classe (qui correspond à la fonction)
         ActFunction **m_actFunction{0};//comme pour cos mais en plus c'est un tableau donc pointeur sur pointeur du coup il faut faire new[] puis new sur chaque element
 
         double *m_learningRate{0};//plus rapide pour les couches profondes car elles apprennent moins vite
         int m_miniBatchSize;//peut changer au cours du temps de + en+ gros pour apprendre vite au début puis mieux converger
+        double borneInfDouble;
+        double borneSupDouble;
 
         Eigen::MatrixXd *m_sortieAttendue{0};//là c'est un pointeur juste pour l'initialiser quand on veut ça pourrait ne pas l'être
         Eigen::MatrixXd *m_error{0};//un tableau de taille m_nbLayer l'erreur pour la couche i a l'indice i
@@ -56,7 +74,7 @@ private:
         int m_nbEpoch;//le nombre de parcours des exemples
         double m_lambdaL1;//facteur pour la régularisaton L1 comme si pas la pour =0
         double m_lambdaL2;//facteur pour la régularisaton L2 comme si pas la pour =0
-
+        //pourquoi as-t-on 2 facteurs différents ?
 
         //les trois là sont des pointeurs et constant car ils sont identiques pour tout les TrainSet
         Database const* m_data{0};

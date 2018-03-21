@@ -1,4 +1,7 @@
 #include "Aprentissage.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 Aprentissage::Aprentissage(std::string dataAddress, int nbNetwork, int nbTread): m_nbNetwork(nbNetwork),m_nbTread(nbTread)
 {
@@ -21,6 +24,14 @@ Aprentissage::Aprentissage(std::string dataAddress, int nbNetwork, int nbTread):
 Aprentissage::~Aprentissage()
 {
     delete m_data;
+    delete[] m_nbNeuron;
+    delete[] m_learningRate;
+    delete m_costFunction;
+    for i(int i{0},i<m_nbLayer-1,i++)//est-ce nécessaire ?
+    {
+        delete m_actFunction[i];
+    }
+    delete[] m_actFunction;
 }
 
 void Aprentissage::learn()
@@ -50,7 +61,7 @@ void Aprentissage::learn()
 
 void Aprentissage::createDataBase(std::string type, std::string dataAddress)
 {
-// initialise m_data pour construire la base de données
+    // initialise m_data pour construire la base de données
     if(type=="bool")
         m_data=new DatabaseT<bool>{dataAddress};
     else if(type=="char")
@@ -83,25 +94,108 @@ void Aprentissage::createDataBase(std::string type, std::string dataAddress)
 
 void Aprentissage::setParameters()
 {
-    /*demande à l'utilsateur(std::cin) les valeurs ou si aleatoire
-    de tous les attributs de TrainSet puis les fais passer aux
-    trainSet par init pour faire passer le plus simple c'est surement
-    de rajouter des attributs a Aprentissage et de les rajouters comme
-    parametre a init. J'ai mis des commentaires pour des variables dans le .h
-    (surtout pour dire pourquoi c'est des pointeurs ou quand c'est moins facile de savoir
-     ce que c'est vu que je les nommes pas très bien)*/
+    choisir("m_nbLayer", m_nbLayer,0);
+    m_nbNeuron = new int[m_nbLayer];
+    for i(int i{1}; i<m_nbLayer-1;i++)
+        choisir("m_nbNeuron", m_nbNeuron[i], i);
+    m_learningRate = new int[m_nbNeuron];
+    for i(int i{0}; i<m_nbLayer;i++)
+        choisir("m_learningRate", m_learningRate[i], i);
+    choisir("m_miniBatchSize", m_miniBatchsize,0);
+    choisir("m_nbEpoch", m_nbEpoch,0);
+    choisir("m_lambdaL1", m_lambdaL1,0);
+    choisir("m_lambdaL1", m_lambdaL1,0);
+    choisirCostFunction();
+    choisirActFunctions();
+}
+
+void Apprentissage::choisir(std::string texte, int entier, int indice)//j'ai vraiment un doute pour la syntaxe, dis-moi si ça marche
+{
+    std::cout<<"Entrez "<< texte <<" - négatif pour aléatoire";
+    std::cin>>entier;
+    if(entier<0)//cas aléatoire
+    {
+        if (indice >0)
+            std::cout<<"Entrez les bornes pour "<< texte " numéro "<<indice;
+        else
+            std::cout<<"Entrez les bornes pour "<< texte " numéro ";
+        std::cin>>borneInfInt>>borneSupInt;
+        srand(time(NULL)); // initialisation de rand, borneSupInt exclue
+        entier = rand()%(borneSupInt-borneInfInt)+borneInfInt;
+    }
+}
+
+void Apprentissage::choisir(std::string texte, double flottant, int indice)
+{
+    std::cout<<"Entrez "<< texte <<" - négatif pour aléatoire";
+    std::cin>>flottant;
+    if(flottant<0)//cas aléatoire
+    {
+        if (indice >0)
+            std::cout<<"Entrez les bornes pour "<< texte<< "numéro "<< indice;
+        else
+            std::cout<<"Entrez les bornes pour "<< texte;
+        std::cin>>borneInfDouble>>borneSupDouble;
+        srand(time(NULL));
+        flottant = rand()/(double)RAND_MAX ) * (borneSupDouble-borneInfDouble) + borneInfDouble;
+    }
+}
+
+void Apprentissage::choisirCostFunction()
+{
+    std::cout<<"Entrez la fonction de coût :"<< std::endl;
+    std::cout<<"0 pour aléatoire, 1 pour CrossEntropy, 2 pour Quadratic, 3 pour LogLikelihood"//mettre un numéro pour chaque fonction de cout
+    int idCostFunction;
+    std::cin>>idCostFunction;
+    if(idCostFunction=0)//cas aléatoire
+    {
+        srand(time(NULL)); // initialisation de rand
+        idCostFunction = rand()%(4-1)+1;
+    }
+    if(idCostFunction=1)
+        m_costFunction = new CostFunction CrossEntropy;
+    if(idCostFunction=2)
+        m_costFunction = new CostFunction Quadratic;
+    if(idCostFunction=3)
+        m_costFunction = new CostFunction LogLikelihood;//je suis pas tout à fait sûr pour la syntaxe
+}
+
+void Apprentissage::choisirActFunctions()
+{
+    m_actFunction = new ActFunction[m_nbLayer]
+    std::cout<<"Entrez les "<<m_nbLayer<<"fonctions d'activation :"<< std::endl;
+    std::cout<<"0 pour aléatoire, 1 pour Sigmoid, 2 pour SoftMax, 3 pour Tanh, 4 pour UpTanh";
+    for i(int i{0},i<m_nbLayer -1,i++)
+    {
+        int idActFunction;
+        std::cin>>idActFunction;
+        if(idActFunction=0)//cas aléatoire
+        {
+            srand(time(NULL)); // initialisation de rand
+            idCostFunction = rand()%(5-1)+1;
+        }
+        if(idActFunction=1)
+            m_actFunction[i] = new ActFunction Sigmoid;
+        if(idActFunction=2)
+            m_actFunction[i] = new ActFunction SoftMax;
+        if(idActFunction=3)
+            m_actFunction[i] = new ActFunction Tanh;
+        if(idActFunction=4)
+            m_actFunction[i] = new ActFunction UpTanh;
+    }
 }
 
 double Aprentissage::test()
 {
     /*renvoie un indicateur de la réussite d'exactitude
-    ou valeur de la fonction de cout ou autre
-    pour la validation j'ai fait avec le cout
-    t'aura surement besoin de loadTestInput de DataBase qui
-    met les donnée dans ses arguments et de resizeMiniBatch pour
+    ou valeur de la fonction de cout t'auras surement besoin de loadTestInput de DataBase qui
+    met les données dans ses arguments et de resizeMiniBatch pour
     mettre les matrice a la taille pour le nombre d'exemple de test
-    (loadTestInput les charges tous d'un coup tu peux modifier si
-     tu veux faire autrement*/
+    (loadTestInput les charges tous d'un coup tu peux modifier si tu veux faire autrement*/
+    resizeMiniBatch(*m_nbTestExemple);
+    m_data->loadTestInput(m_neuralNetwork->m_layer[0],*m_sortieAttendue);
+    m_neuralNetwork->calcul();
+    return (*m_costFunction/*il faut plutôt essayer de mettre LogLikelihood du coup ?*/)(m_neuralNetwork->m_layer[m_nbLayer-1],*m_sortieAttendue);
 }
 
 Aprentissage::TrainSet::TrainSet(){}
@@ -109,7 +203,7 @@ Aprentissage::TrainSet::TrainSet(){}
 Aprentissage::TrainSet::~TrainSet()
 {
     delete[] m_nbNeuron;
-    for(int i{0};i<m_nbLayer;i++)
+    for(int i{0};i<m_nbLayer;i++) //cette boucle est-elle nécessaire ?
         delete m_actFunction[i];
     delete[] m_actFunction;
     delete m_costFunction;
@@ -125,7 +219,7 @@ void Aprentissage::TrainSet::init(Database const* data)
     m_nbTrainingExemple=m_data->getNbTrainingExemple();
     m_nbValidationExemple=m_data->getNbValidationExemple();
 
-    //initialiser toutes les autres variables a partir des résultat de setParameters
+    Apprentissage::setParameters(); //initialiser toutes les autres variables a partir des résultat de setParameters
 
     m_sortieAttendue=new Eigen::MatrixXd(m_nbNeuron[m_nbLayer-1],m_miniBatchSize);
     m_error=new Eigen::MatrixXd[m_nbLayer];
@@ -162,21 +256,21 @@ void Aprentissage::TrainSet::feedForward()
 {
     for(int j{1};j<m_nbLayer;j++)
     {
-        m_error[j]=(m_neuralNetwork->m_weight[j]*m_neuralNetwork->m_layer[j-1]).colwise()+m_neuralNetwork->m_bias[j];
+        m_error[j]=(m_neuralNetwork->m_weight[j]*m_neuralNetwork->m_layer[j-1]).colwise()+m_neuralNetwork->m_bias[j]; //on stocke z dans m_error et a dans m_layer
         m_neuralNetwork->m_layer[j]=(*m_actFunction[j])(m_error[j]);
     }
 }
 
 void Aprentissage::TrainSet::calculOutputError()
 {
-     //determine la valeur de m_error[m_nbLayer-1]
+     m_error[m_nbLayer-1]=m_actFunction[m_nbLayer-1]->prime(m_error[m_nbLayer-1]).cwiseProduct(m_costFunction->gradient(m_neuralNetwork->m_layer[m_nbLayer-1],m_neuralNetwork->m_sortieAttendue));
 }
 
 void Aprentissage::TrainSet::backpropagation()
 {
     for(int j{m_nbLayer-2};j>0;j--)
     {
-         m_error[j]=m_actFunction[j]->prime(m_error[j]).cwiseProduct(m_neuralNetwork->m_weight[j+1].transpose()*m_error[j+1]);
+         m_error[j]=m_actFunction[j]->prime(m_error[j]).cwiseProduct(m_neuralNetwork->m_weight[j+1].transpose()*m_error[j+1]);// que représente z dans la formule donnée ?
     }
 }
 

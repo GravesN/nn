@@ -43,12 +43,12 @@ Eigen::MatrixXd const SoftMax::prime(Eigen::MatrixXd const&mat)
 
 double CrossEntropy::operator() (Eigen::MatrixXd const&output,Eigen::MatrixXd const&desiredOutput)
 {
-// à remplir
+    return -1/(output.cols())*((desiredOutput.array()*Eigen::log(output.array())+(1-desiredOutput.array())*Eigen::log(1-output.array())).sum())
 }
 
 Eigen::MatrixXd const CrossEntropy::gradient(Eigen::MatrixXd const&output,Eigen::MatrixXd const&desiredOutput)
 {
-// à remplir
+    return -1/(output.cols())*((desiredOutput.array()/output.array() - (1-desiredOutput.array())/(1-output.array()))).rowwise().sum()
 }
 
 double Quadratic::operator() (Eigen::MatrixXd const&output,Eigen::MatrixXd const&desiredOutput)
