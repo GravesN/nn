@@ -31,6 +31,7 @@ Apprentissage::Apprentissage(std::istream &flux):m_flux(flux)
     setParameters();
 }
 
+
 Apprentissage::~Apprentissage()
 {
     delete m_data;
@@ -51,6 +52,8 @@ Apprentissage::~Apprentissage()
     delete m_costFunction;
     delete[] m_nbLayer;
     delete[] m_actFunction;
+    
+    delete m_bestTrainSet;
 }
 
 void Apprentissage::learn()
@@ -60,26 +63,30 @@ void Apprentissage::learn()
     {
         std::thread threads[m_nbThread];
 
-        TrainSet trainSet[m_nbThread];
+        TrainSet* trainSet[m_nbThread];
         for(int i{0};i<m_nbThread;i++)
         {
+            trainSet[i]=new TrainSet;
             trainSet[i].init(m_data, m_nbLayer, m_nbNeuron, m_learningRate, m_miniBatchSize, m_nbEpoch, m_lambdaL1, m_lambdaL2, m_costFunction, m_actFunction, &m_stop,m_save,j*m_nbThread+i,m_saveAddress);
-            threads[i]=std::thread(&Apprentissage::TrainSet::trainNetwork,&trainSet[i]);
+            threads[i]=std::thread(&Apprentissage::TrainSet::trainNetwork,trainSet[i]);
         }
         for(int i{0};i<m_nbThread;i++)
         {
             threads[i].join();
             std::cout << "join réalisé" << std::endl;
-            double valid(trainSet[i].validation());
+            double valid(trainSet[i]->validation());            
             std::cout << "arrivé à la validation" << std::endl;
             if(valid>m_bestValidation||m_bestTrainSet==0)//modifié ici
             {
                 m_bestValidation=valid;
                 if(m_bestTrainSet!=0)
                     m_bestTrainSet->setSave(m_save);
-                m_bestTrainSet=&trainSet[i];
+                delete m_bestTrainSet;
+                m_bestTrainSet=trainSet[i];
                 m_bestTrainSet->setSave(true);
+                trainSet[i]=0;
             }
+            delete trainSet[i];
             std::cout << "sortie de la validation" << std::endl;
         }
 
