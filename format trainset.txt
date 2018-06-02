@@ -1,0 +1,11 @@
+adresse base de donnée relatif o absolue
+m_nbLayer(n)
+m_costFunction
+m_actFunction 1 ... m_actFunction n
+m_nbNeuron 1 ... m_nbNeuron n
+m_learningRate1 ... m_learningRate n
+m_miniBatchSize
+m_nbEpoch
+m_lambdaL1
+m_lambdaL2
+m_validationScore

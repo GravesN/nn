@@ -19,20 +19,24 @@
 1496412320 source:f:\proj\neural network\src\database.cpp
 	"Database.h"
 
-1519597084 source:d:\projet\nn-master\aprentissage.cpp
+1526160452 source:d:\projet\nn-master\aprentissage.cpp
 	"Aprentissage.h"
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
 
-1519597084 d:\projet\nn-master\aprentissage.h
+1526215376 d:\projet\nn-master\aprentissage.h
 	"NeuralNetwork.h"
 	<thread>
-
-1519598367 d:\projet\nn-master\neuralnetwork.h
 	"Database.h"
+
+1526215376 d:\projet\nn-master\neuralnetwork.h
 	<functional>
 	<random>
 	"fonctions.h"
+	<fstream>
 
-1519588628 d:\projet\nn-master\database.h
+1526077693 d:\projet\nn-master\database.h
 	<Eigen/Dense>
 	<string>
 	<iostream>
@@ -40,20 +44,22 @@
 	<cstdlib>
 	<ctime>
 
-1519503987 source:d:\projet\nn-master\database.cpp
+1522355838 source:d:\projet\nn-master\database.cpp
 	"Database.h"
 
-1519162694 source:d:\projet\nn-master\main.cpp
-	<iostream>
-	"fonctions.h"
+1526160649 source:d:\projet\nn-master\main.cpp
+	"Aprentissage.h"
 
-1519579732 source:d:\projet\nn-master\neuralnetwork.cpp
+1526230867 source:d:\projet\nn-master\neuralnetwork.cpp
 	"NeuralNetwork.h"
 
-1519598290 source:d:\projet\nn-master\fonctions.cpp
+1526161119 source:d:\projet\nn-master\fonctions.cpp
 	"fonctions.h"
 
-1519598290 d:\projet\nn-master\fonctions.h
+1526061663 d:\projet\nn-master\fonctions.h
 	<cmath>
 	<Eigen/Core>
+	<string>
+	<sstream>
+	<iostream>
 

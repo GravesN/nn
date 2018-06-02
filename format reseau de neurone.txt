@@ -1,0 +1,7 @@
+nbLayer(n)
+fonction d'activation 1 2 ... n-1
+nombre de neurone 0 1 ... n-1
+
+les poids
+
+les bias
