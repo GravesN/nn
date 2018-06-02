@@ -1,0 +1,11 @@
+/home/nicolas/Documents/TIPE/data/xor/dataset.txt
+3
+CrossEntropy
+Sigmoid Sigmoid 
+2 5 1 
+6.92647e-310 1 2.5 
+4
+1200
+0
+0
+-nan

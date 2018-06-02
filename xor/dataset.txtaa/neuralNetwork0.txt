@@ -1,0 +1,22 @@
+3
+Sigmoid Sigmoid 
+2 5 1 
+
+-nan -nan
+-nan -nan
+-nan -nan
+-nan -nan
+-nan -nan
+
+ nan  nan  nan  nan -nan
+
+
+
+-nan
+-nan
+-nan
+-nan
+-nan
+
+nan
+

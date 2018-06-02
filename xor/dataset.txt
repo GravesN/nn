@@ -1,0 +1,7 @@
+bool
+2
+1
+4
+4
+4
+/home/nicolas/Documents/TIPE/data/xor/features/
