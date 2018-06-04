@@ -17,11 +17,12 @@ public:
     virtual int const* getNbTestExemple() const=0;
     virtual Eigen::MatrixXd const getResultTestOutput() const=0;
     virtual Eigen::MatrixXd const getTestInput() const=0;
+
     virtual int getInputSize() const=0;
     virtual int getOutputSize() const=0;
     virtual void loadTrainingInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue,int debut,int nombre) const=0;
     virtual void loadValidationInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue) const=0;
-    virtual void loadTestInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue) const=0;
+
     virtual std::string nom() const=0;
 private:
 
@@ -34,15 +35,16 @@ public:
 
     DatabaseT(std::string dataAddress)
     {
+        /// construit la base de données ///
         m_nom=dataAddress;
         std::ifstream data(dataAddress, std::ios::in);
 
         if(data)
         {
             std::string type;
-            std::string folderAddress;
+            std::string dossier;
             data>>type;
-            data>>m_inputSize>>m_outputSize>>m_nbTrainingExemple>>m_nbValidationExemple>>m_nbTestExemple>>folderAddress;
+            data>>m_inputSize>>m_outputSize>>m_nbTrainingExemple>>m_nbValidationExemple>>m_nbTestExemple>>dossier;
 
             m_trainingData=new  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(m_inputSize,m_nbTrainingExemple);
             m_resultTrainingData=new  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(m_outputSize,m_nbTrainingExemple);
@@ -53,53 +55,54 @@ public:
             m_testData=new  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(m_inputSize,m_nbTestExemple);
             m_resultTestData=new  Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>(m_outputSize,m_nbTestExemple);
 
-            std::ifstream train(folderAddress+"nomsTrain.txt",std::ios::in);
-
-            std::string nom;
+            std::ifstream train(dossier+"nomsTrain.txt",std::ios::in);
+            std::string nomFichier;
+            std::cout << m_inputSize << "  " << m_outputSize << std::endl;
 
             for(int j{0};j<m_nbTrainingExemple;j++)
             {
-                train >> nom;
-                std::ifstream flux(folderAddress+"train/"+nom,std::ios::in);
+                train >> nomFichier;
+                std::ifstream flux(dossier+"train/"+nomFichier,std::ios::in);
                 for(int i{0};i<m_inputSize;i++)
                 {
-
                     flux >> (*m_trainingData)(i,j);
                 }
-                flux.close();
-
                 for(int i{0};i<m_outputSize;i++)
                 {
-                    data>>(*m_resultTrainingData)(i,j);
+                    flux>>(*m_resultTrainingData)(i,j);
                 }
+                flux.close();
             }
             train.close();
             std::cout << "train ok" << std::endl;
 
-            std::ifstream validation(folderAddress+"nomsValidation.txt",std::ios::in);
+            std::ifstream validation(dossier+"nomsValidation.txt",std::ios::in);
             for(int j{0};j<m_nbValidationExemple;j++)
             {
-                validation >> nom;
-                std::ifstream flux(folderAddress+"validation/"+nom,std::ios::in);
+                validation >> nomFichier;
+                //std::cout << nomFichier << std::endl;
+                std::ifstream flux(dossier+"validation/"+nomFichier,std::ios::in);
                 for(int i{0};i<m_inputSize;i++)
                 {
                     flux>>(*m_validationData)(i,j);
+                   // std:: cout << (*m_validationData)(i,j) << "  ";
                 }
-
                 for(int i{0};i<m_outputSize;i++)
                 {
                     flux>>(*m_resultValidationData)(i,j);
+                    //std::cout << (*m_resultValidationData)(i,j) << "  ";
                 }
                 flux.close();
             }
+            //std::cout << std::endl << *m_validationData << std::endl << std::endl << *m_resultValidationData << std::endl;
             validation.close();
             std::cout << "validation ok" << std::endl;
 
-            std::ifstream test(folderAddress+"nomsTest.txt",std::ios::in);
+            std::ifstream test(dossier+"nomsTest.txt",std::ios::in);
             for(int j{0};j<m_nbTestExemple;j++)
             {
-                test >> nom;
-                std::ifstream flux(folderAddress+"validation/"+nom,std::ios::in);
+                test >> nomFichier;
+                std::ifstream flux(dossier+"validation/"+nomFichier,std::ios::in);
                 for(int i{0};i<m_inputSize;i++)
                 {
                     flux>>(*m_testData)(i,j);
@@ -107,9 +110,6 @@ public:
 
                 for(int i{0};i<m_outputSize;i++)
                 {
-                    //std::cout << m_outputSize  << " " << i << std::endl;//pas de problème de ce côté là finalement, mais l'entrée récupérée ne fait toujours pas la bonne taille...
-                    //std::string poubelle;
-                    //std::cin >> poubelle;
                     flux>>(*m_resultTestData)(i,j);
                 }
 
@@ -117,10 +117,6 @@ public:
             }
             test.close();
             std::cout << "test ok" << std::endl;
-            //std::cout <<   << std::endl;
-            std::string poubelle;
-            std::cin >> poubelle;
-
             data.close();
         }
         else
@@ -129,6 +125,7 @@ public:
 
     virtual ~DatabaseT()
     {
+        /// destructeur de type ///
         delete m_trainingData;
         delete m_resultTrainingData;
         delete m_validationData;
@@ -139,41 +136,49 @@ public:
 
     virtual int const* getNbTrainingExemple() const
     {
+        /// renvoie le nombre d'exemples pour l'entraînement ///
         return &m_nbTrainingExemple;
     }
 
     virtual int const* getNbValidationExemple() const
     {
+        /// renvoie le nombre d'exemples pour la validation ///
         return &m_nbValidationExemple;
     }
 
     virtual int const* getNbTestExemple() const
     {
+        /// renvoie le nombre d'exemples pour le test ///
         return &m_nbTestExemple;
     }
 
     virtual int getInputSize() const
     {
+        /// renvoie la taille de l'entrée ///
         return m_inputSize;
     }
 
     virtual int getOutputSize() const
     {
+        /// renvoie la taille de la sortie ///
         return m_outputSize;
     }
 
     virtual Eigen::MatrixXd const getResultTestOutput() const
     {
+        /// renvoie la matrice de flottants contenant la sortie attandue pour le test (double précision) ///
         return (m_resultTestData->template cast<double>());
     }
 
     virtual Eigen::MatrixXd const getTestInput() const
     {
+        /// renvoie la matrice de flottants contenant l'entrée attendue pour le test (double précision) ///
         return (m_testData->template cast<double>());
     }
 
     virtual void loadTrainingInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue,int debut,int nombre) const
     {
+        /// charge les données pour l'entraînement dans les matrices fournies, convertis en flottants (double précision) ///
         std::srand(std::time(nullptr));
         for(int j{0};j<nombre;j++)
         {
@@ -190,18 +195,14 @@ public:
 
     virtual void loadValidationInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue) const
     {
+        /// charge les données pour la validation dans les matrices fournies, convertis en flottants (double précision) ///
         input=m_validationData->template cast<double>();
         sortieAttendue=m_resultValidationData->template cast<double>();
     }
 
-    virtual void loadTestInput(Eigen::MatrixXd &input,Eigen::MatrixXd &sortieAttendue) const
-    {
-        input=m_testData->template cast<double>();
-        sortieAttendue=m_resultTestData->template cast<double>();
-    }
-
     virtual std::string nom() const
     {
+        /// renvoie le nom de la base de données ///
         return m_nom;
     }
 

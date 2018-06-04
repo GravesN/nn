@@ -4,22 +4,30 @@ int main()
 {
     srand(time(NULL));
     std::string parameterAddress{""};
-    std::cout<<"fichier pour les parametres existe pas pour sans"<<std::endl;
+    std::cout<<"adresse du fichier pour les parametres le cas echeant"<<std::endl;
     std::cin>>parameterAddress;
     std::ifstream flux(parameterAddress, std::ios::in);
     std::istream *fluxx(0);
     if(flux)
-    {
         fluxx=&flux;
-    }
     else
-    {
         fluxx=&std::cin;
-    }
+    //bool reseauPresent;
+    //std::cout << "Y a t-il un reseau de neurones pre-entraine ?" << std::endl;
+    //std::cin >> reseauPresent;
+    //std::string adresseReseau;
+    //if (reseauPresent)
+    //{
+    //    std::cout << "adresse de ce reseau" << std::endl;
+    //    std::cin >> adresseReseau;
+    //}
     Apprentissage apprentissage{*fluxx};
-    apprentissage.learn();
+    //if (not reseauPresent)
+        apprentissage.learn();
+    //else
+       // apprentissage.construitReseau(adresseResesau);
+    apprentissage.test();
     flux.close();
-
     return 0;
 }
 

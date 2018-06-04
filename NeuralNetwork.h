@@ -12,11 +12,10 @@ class NeuralNetwork
     friend class Apprentissage;
 
 public:
-    NeuralNetwork(std::string fileAddress);//construit un réseau à partir d'un fichier (déja entrainé à priori)
+    NeuralNetwork(std::string fileAddress);
     NeuralNetwork(int nbLayer,int *nbNeuron,ActFunction const*const*actFunction,int nbDataParCalcul=1,bool save=false, std::string saveAddress="");//construit un réseau à partir des données fournies (non entrainé à priori)
     ~NeuralNetwork();
-    Eigen::MatrixXd const& use(Eigen::MatrixXd const&input);
-    Eigen::MatrixXd *m_layer{0};
+    Eigen::MatrixXd const& use(Eigen::MatrixXd const&entree);
 
 private:
 
@@ -27,6 +26,7 @@ private:
 
     int m_nbLayer;
 
+    Eigen::MatrixXd *m_layer{0};
     Eigen::MatrixXd *m_weight{0};
     Eigen::VectorXd *m_bias{0};
 

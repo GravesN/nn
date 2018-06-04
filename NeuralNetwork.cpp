@@ -2,8 +2,8 @@
 
 NeuralNetwork::NeuralNetwork(std::string fileAddress)
 {
-    //crée le réseau de neurones à partir de l'addresse du fichier
-    std::ifstream file(fileAddress, std::ios::in); //ouverture du fichier en lecture
+    /// crée le réseau de neurones à partir de l'adresse du fichier sous le format indiqué ///
+    std::ifstream file(fileAddress, std::ios::in);
     m_saveAddress=fileAddress;
     if (file)
     {
@@ -60,10 +60,11 @@ NeuralNetwork::NeuralNetwork(std::string fileAddress)
 
 NeuralNetwork::NeuralNetwork(int nbLayer,int *nbNeuron,ActFunction const*const*actFunction,int nbDataParCalcul,bool save, std::string saveAddress) //les 0 dans la déclaration des pointeurs ?(cf OpenClassrooms)
 {
+    /// crée un nouveau réseau de neurones avec les caractéristiques données en argument ///
     m_nbLayer=nbLayer;
     m_layer=new Eigen::MatrixXd[m_nbLayer];
     m_weight=new Eigen::MatrixXd[m_nbLayer];
-    m_bias=new Eigen::VectorXd[m_nbLayer]; //initilisation du réseau en créant des matrices vides
+    m_bias=new Eigen::VectorXd[m_nbLayer];
     m_layer[0]=Eigen::MatrixXd::Zero(nbNeuron[0],nbDataParCalcul);
     m_weight[0]=Eigen::MatrixXd::Zero(1,1);
     m_bias[0]=Eigen::MatrixXd::Zero(1,1);
@@ -96,6 +97,7 @@ NeuralNetwork::NeuralNetwork(int nbLayer,int *nbNeuron,ActFunction const*const*a
 
 NeuralNetwork::~NeuralNetwork()
 {
+    /// destructeur du type NeuralNetwork ///
     if(m_save)
         saveNeuralNetwork();
     delete[] m_layer;
@@ -109,6 +111,7 @@ NeuralNetwork::~NeuralNetwork()
 
 void NeuralNetwork::saveNeuralNetwork()
 {
+    /// sauvegarde le réseau de neurones sous le format indiqué ///
     std::ofstream file(m_saveAddress+".txt", std::ios::out | std::ios::trunc);
     if(file)
     {
@@ -132,7 +135,7 @@ void NeuralNetwork::saveNeuralNetwork()
 
 void NeuralNetwork::initvalue()
 {
-
+    /// initialise les poids et les biais du réseau ///
     for(int i=1;i<m_nbLayer;i++)
     {
         m_weight[i].setRandom();
@@ -142,28 +145,17 @@ void NeuralNetwork::initvalue()
     }
 }
 
-Eigen::MatrixXd const& NeuralNetwork::use(Eigen::MatrixXd const&input)
+Eigen::MatrixXd const& NeuralNetwork::use(Eigen::MatrixXd const&entree)
 {
-    std::cout << "problème pour l'input" << std::endl;
-    std::cout << input << std::endl;
-    std::cout << "passe ici" << std::endl;
-    std::cout << m_layer[0].cols() << " " << input.cols() << std::endl;
-    std::cout << m_layer[0].rows() << " " << input.rows() << std::endl;
-    //std::cout << m_layer[0] << std::endl;
-    //for (int i{0}; i< input.cols(); i++)
-    //{
-       // std::cout << m_layer[0](0,i) << std::endl;
-        m_layer[0]=input;
-       // std::cout << m_layer[0](0,i) << std::endl;
-    //}
-         //ok, l'erreur se fait ici, les vecteurs font bien la même taille. Le problème, c'est probablement le fait de copier une matrice constante
-    std::cout << "problème pour le calcul" << std::endl;
+    /// calcule la sortie attendue pour l'entrée fournie ///
+    m_layer[0]=entree;
     calcul();
     return m_layer[m_nbLayer-1];
 }
 
 inline void NeuralNetwork::calcul()
 {
+    /// calcule les valeurs dans toutes les couches, une fois l'entrée initialisée ///
     for(int i{1};i<m_nbLayer;i++)
     {
         calculLayer(i);
@@ -172,6 +164,7 @@ inline void NeuralNetwork::calcul()
 
 inline void NeuralNetwork::calculLayer(int number)
 {
-   m_layer[number]=(*m_actFunction[number])((m_weight[number]*m_layer[number-1]).colwise()+m_bias[number]);
+    /// calcule les valeurs obtenues dans une couche ///
+    m_layer[number]=(*m_actFunction[number])((m_weight[number]*m_layer[number-1]).colwise()+m_bias[number]);
 }
 

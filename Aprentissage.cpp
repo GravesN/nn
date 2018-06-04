@@ -5,15 +5,15 @@
 
 Apprentissage::Apprentissage(std::istream &flux):m_flux(flux)
 {
+    /// initialise les paramètres pour l'apprentissage en demandant ou en utilisant le fichier adapté ///
     std::string dataAddress;
-    std::cout<<"dataAddress"<<std::endl;
+    std::cout<<"adresse de la base de donnees ?"<<std::endl;
     m_flux>>dataAddress;
     std::ifstream data(dataAddress, std::ios::in);
     if(data)
     {
         std::string type;
-        data>>type; // sert à récupérer à partir du fichier jusqu'à un délimiteur
-        // ici, on récupère donc tout pour le mettre dans une chaîne de caractères
+        data>>type;
         createDataBase(type, dataAddress);
         data.close();
     }
@@ -31,9 +31,9 @@ Apprentissage::Apprentissage(std::istream &flux):m_flux(flux)
     setParameters();
 }
 
-
 Apprentissage::~Apprentissage()
 {
+    /// destructeur du type ///
     delete m_data;
     for (int i{0};i<m_nbLayer[2];i++)
     {
@@ -52,12 +52,13 @@ Apprentissage::~Apprentissage()
     delete m_costFunction;
     delete[] m_nbLayer;
     delete[] m_actFunction;
-    
+
     delete m_bestTrainSet;
 }
 
 void Apprentissage::learn()
 {
+    /// réalise l'apprentissage une fois les paramètres fixés ///
     std::thread threadStop(&Apprentissage::stop,this);
     for(int j{0};j!=m_nbNetwork/m_nbThread&&!m_stop;j++)
     {
@@ -67,15 +68,13 @@ void Apprentissage::learn()
         for(int i{0};i<m_nbThread;i++)
         {
             trainSet[i]=new TrainSet;
-            trainSet[i].init(m_data, m_nbLayer, m_nbNeuron, m_learningRate, m_miniBatchSize, m_nbEpoch, m_lambdaL1, m_lambdaL2, m_costFunction, m_actFunction, &m_stop,m_save,j*m_nbThread+i,m_saveAddress);
+            trainSet[i]->init(m_data, m_nbLayer, m_nbNeuron, m_learningRate, m_miniBatchSize, m_nbEpoch, m_lambdaL1, m_lambdaL2, m_costFunction, m_actFunction, &m_stop,m_save,j*m_nbThread+i,m_saveAddress);
             threads[i]=std::thread(&Apprentissage::TrainSet::trainNetwork,trainSet[i]);
         }
         for(int i{0};i<m_nbThread;i++)
         {
             threads[i].join();
-            std::cout << "join réalisé" << std::endl;
-            double valid(trainSet[i]->validation());            
-            std::cout << "arrivé à la validation" << std::endl;
+            double valid(trainSet[i]->validation());
             if(valid>m_bestValidation||m_bestTrainSet==0)//modifié ici
             {
                 m_bestValidation=valid;
@@ -84,22 +83,46 @@ void Apprentissage::learn()
                 delete m_bestTrainSet;
                 m_bestTrainSet=trainSet[i];
                 m_bestTrainSet->setSave(true);
-                trainSet[i]=0;
             }
+            if(trainSet[i]->m_save)
+                trainSet[i]->save();
+            trainSet[i]=0;
             delete trainSet[i];
-            std::cout << "sortie de la validation" << std::endl;
         }
-
     }
-    std::cout << "bien trouvé le meilleur trainSet" << std::endl;
     m_stop=true;
-    test();
     threadStop.join();
 }
+/*
+void Apprentissage::construitReseau(std::string adresseReseau, std::string dataAddress)
+{
+    TrainSet* m_bestTrainset{0};
+    NeuralNetwork reseauN = &NeuralNetwork(adresseReseau);
+    m_bestTrainSet->m_neuralNetwork = reseauN;
+    //m_bestTrainSet->m_stop;
+    m_bestTrainSet->m_save=true;
+    m_bestTrainSet->m_saveAddress=dataAddress+"aa/trainSet0";
+    m_bestTrainSet->m_data=m_data;
+    m_bestTrainSet->m_nbTrainingExemple=m_bestTrainSet->m_data->getNbTrainingExemple();
+    m_bestTrainSet->m_nbValidationExemple=m_bestTrainSet->m_data->getNbValidationExemple();
+    std::ifstream reseau(adresseReseau, std::ios::in);
+    reseau >> m_bestTrainSet->m_nbLayer;
+    reseau.close();
+    m_bestTrainSet->m_nbNeuron = m_nbNeuron[0];
+    m_bestTrainSet->m_learningRate = new double[m_bestTrainSet->m_nbLayer];
+    m_bestTrainSet->m_miniBatchSize = *(m_bestTrainset->m_nbValidationExemple);
+    //m_bestTrainSet->m_costFunction = m_bestTrainSet->m_neuralNetwork->m_costFunction;
+    m_bestTrainSet->m_actFunction = m_bestTrainSet->m_neuralNetwork->m_actFunction;
+    m_bestTrainSet->m_sortieAttendue=new Eigen::MatrixXd(m_bestTrainSet->m_nbNeuron[m_bestTrainSet->m_nbLayer-1],m_bestTrainSet->m_miniBatchSize);
+    m_bestTrainSet->m_error=new Eigen::MatrixXd[m_bestTrainSet->m_nbLayer];
+    for(int i{0};i<m_bestTrainSet->m_nbLayer;i++)
+        m_bestTrainSet->m_error[i]=m_bestTrainSet->m_neuralNetwork->m_layer[i];
+}
+*/
 
 void Apprentissage::createDataBase(std::string type, std::string dataAddress)
 {
-    // initialise m_data pour construire la base de données
+    /// initialise m_data pour construire la base de données ///
     if(type=="bool")
         m_data=new DatabaseT<bool>{dataAddress};
     else if(type=="char")
@@ -132,6 +155,7 @@ void Apprentissage::createDataBase(std::string type, std::string dataAddress)
 
 void Apprentissage::setParameters()
 {
+    /// initialise les hyperparamètres pour l'apprentissage ///
     choisir("m_nbLayer", m_nbLayer);
     m_nbNeuron = new int*[m_nbLayer[2]];
     m_nbNeuron[0]=new int[3];
@@ -191,11 +215,11 @@ void Apprentissage::setParameters()
     }
     choisirCostFunction();
     choisirActFunction();
-
 }
 
 void Apprentissage::stop()
 {
+    /// permet l'arrêt prématuré si nécessaire ///
     std::string st;
     while(!m_stop)
     {
@@ -208,16 +232,16 @@ void Apprentissage::stop()
 
 double Apprentissage::TrainSet::evaluation(double *flottant)
 {
+    /// renvoie la valeur indiquée ou une valeur entre les bornes indiquées dans le cas aléatoire (flottant double précision) ///
     if(flottant[0]<0)//cas aléatoire
-    {
         return rand()/(double) RAND_MAX  * (flottant[2]-flottant[1])+flottant[1];
-    }
     else
         return flottant[0];
 }
 
  int Apprentissage::TrainSet::evaluation(int *entier)
 {
+    /// renvoie la valeur indiquée ou une valeur entre les bornes indiquées dans le cas aléatoire (entier) ///
     if(entier[0]<0)//cas aléatoire
     {
         return rand()%(entier[2]-entier[1])+entier[1];
@@ -228,6 +252,7 @@ double Apprentissage::TrainSet::evaluation(double *flottant)
 
 void Apprentissage::choisir(std::string texte, int *&entier)
 {
+    /// permet de fixer une valeur ou de donner un intervalle dans le cas aléatoire (entier) ///
     std::cout<<"Entrez "<< texte <<" - negatif pour aleatoire"<<std::endl;
     m_flux>>entier[0];
     if (entier[0]<0)
@@ -244,6 +269,7 @@ void Apprentissage::choisir(std::string texte, int *&entier)
 
 void Apprentissage::choisir(std::string texte, double *&flottant)
 {
+    /// permet de fixer une valeur ou de donner un intervalle dans le cas aléatoire (flottant double précision) ///
     std::cout<<"Entrez "<< texte <<" - negatif pour aleatoire"<<std::endl;
     m_flux>>flottant[0];
     if (flottant[0]<0)
@@ -260,6 +286,7 @@ void Apprentissage::choisir(std::string texte, double *&flottant)
 
 void Apprentissage::choisirCostFunction()
 {
+    /// permet de choisir une fonction de coüt ///
     std::cout<<"Entrez la fonction de cout :"<< std::endl;
     std::cout<<"1 pour CrossEntropy, 2 pour Quadratic, 3 pour LogLikelihood"<<std::endl;//mettre un numéro pour chaque fonction de cout
     int idCostFunction;
@@ -280,6 +307,7 @@ void Apprentissage::choisirCostFunction()
 
 void Apprentissage::choisirActFunction()
 {
+    /// permet de choisir les fonctions d'activation pour les couches intermédiaires ///
     m_actFunction = new ActFunction*[m_nbLayer[2]];
     m_actFunction[0]=0;
     std::cout<<"Entrez les "<<m_nbLayer[2]-1<<" fonctions d'activation eventuelles:"<< std::endl;
@@ -307,56 +335,29 @@ void Apprentissage::choisirActFunction()
     }
 }
 
-double Apprentissage::test()
+void Apprentissage::test()
 {
-    //NeuralNetwork *m_neuralNetwork{0};
-    //*m_neuralNetwork = NeuralNetwork(m_saveAddress+"neuralNetwork0.txt");//à modifier, pour faire avec le meilleur trainSet uniquement
-    //std::cout << "problème lors de la copie" << std::endl;
-    std::cout << "entree dans test" << std::endl;
-    //m_bestTrainSet->resizeMiniBatch(*m_nbTestExemple);
-    std::cout << "ok pour le resizeminiBatch" << std::endl;
-    int const m_ouputSize = m_data->getOutputSize();
-    std::cout << m_ouputSize << std::endl;
-    const Eigen::MatrixXd m_sortieVraie = m_data->getResultTestOutput();
+    /// affiche un indicateur du taux de réussite du meilleur réseau pour la validation ///
+    const Eigen::MatrixXd m_sortieVraie = m_data->getResultTestOutput();//
     const Eigen::MatrixXd m_entree = m_data->getTestInput();
-    std::cout << "voici l'entree telle que recuperee : " << m_entree << std::endl;
-    //Eigen::MatrixXd m_resultTestData(m_sortie.rows(), m_sortie.cols());
-    //Eigen::MatrixXd m_TestInput(m)
-    //std::cout << m_data->getResultTestOutput() << std::endl;
-
-    //copie(m_resultTestData, (m_data->getResultTestOutput()));
-    std::cout << "problème lors du calcul de la sortie" << std::endl;
-    std::cout << m_bestTrainSet->m_neuralNetwork->m_layer[0] << std::endl;
-    const Eigen::MatrixXd m_sortieCalculee = m_bestTrainSet->m_neuralNetwork->use(m_entree);//c'est probablement l'entrée qui n'est pas de la bonne taille
     //double valid{(*m_costFunction)(m_neuralNetwork->m_layer[m_nbLayer-1],*m_sortieAttendue)};
-
     Eigen::MatrixXd probasTest(2, *m_nbTestExemple);
-    std::cout << "problème pour le calcul de l'erreur" << std::endl;
-    return calculErreurTest(probasTest, m_sortieVraie, m_sortieCalculee);
-    /*renvoie un indicateur de la réussite d'exactitude
-    ou valeur de la fonction de cout t'auras surement besoin de loadTestInput de DataBase qui
-    met les données dans ses arguments et de resizeMiniBatch pour
-    mettre les matrice a la taille pour le nombre d'exemple de test
-    (loadTestInput les charges tous d'un coup tu peux modifier si tu veux faire autrement*/
-    //delete m_neuralNetwork;
+    calculErreurTest(probasTest, m_sortieVraie, m_bestTrainSet->m_neuralNetwork->use(m_entree));
 }
 
 Apprentissage::TrainSet::TrainSet(){}
 
-double Apprentissage::calculErreurTest(Eigen::MatrixXd probas, Eigen::MatrixXd m_sortieVraie, Eigen::MatrixXd m_sortieCalculee)
+void Apprentissage::calculErreurTest(Eigen::MatrixXd probas, Eigen::MatrixXd m_sortieVraie, Eigen::MatrixXd m_sortieCalculee)
 {
-    //std::cout << "problème dans m_ouputSize" << std::endl;
+    /// calcule l'intégrale de la courbe ROC pour les données de test ///
     int m_outputSize = m_sortieVraie.rows();
     int nbExemples = m_sortieVraie.cols();
     for (int id{0} ; id < nbExemples; id++)
     {
-        double true_negative{0};
-        double true_positive{0};
-        double false_negative{0};
-        double false_positive{0};
-        for(int i{0}; i< m_outputSize; i++)//avant : m_outputSize * m_nbTestExemple
+        double true_negative{0}, true_positive{0}, false_negative{0}, false_positive{0};
+        for(int i{0}; i< m_outputSize; i++)
         {
-            if(m_sortieVraie(i, id) == 0)//normalement c'est un entier mais il faut voir si ça ne cause aucun problème
+            if(m_sortieVraie(i, id) == 0)
             {
                 if(m_sortieCalculee(i, id) <= 0.5)
                     true_negative +=1;
@@ -371,25 +372,28 @@ double Apprentissage::calculErreurTest(Eigen::MatrixXd probas, Eigen::MatrixXd m
                     false_negative +=1;
             }
         }
-        probas(0,id) = true_positive / (true_positive + false_negative); //true_positive_rate
-        probas(1,id) = false_positive / (true_negative + false_positive); //false_discovery_rate
+        if (true_positive+false_negative == 0)
+            probas(0,id) = 0.0;
+        else
+            probas(0,id) = true_positive / (true_positive + false_negative); //true_positive_rate
+        if (true_negative+false_positive == 0)
+            probas(1,id) = 0.0;
+        else
+            probas(1,id) = false_positive / (true_negative + false_positive); //false_discovery_rate
     }
-    //std::cout << "problème dans le tri rapide" << std::endl;
     m_bestTrainSet->triRapide(probas, 0, nbExemples -1);//le tri est sur place
-    //calcul de l'intégrale de la receiver operating characteristic
     double I{0.0};
-    //std::cout << "problème dans le calcul de l'intégrale" << std::endl;
     for(int k{0}; k< nbExemples-1; k++)
     {
         I  += (probas(0,k+1) - probas(0,k))*(probas(1,k+1) + probas(1,k))/2;
     }
-    return I;
+    I+= (1.0 - probas(0, nbExemples-1))*(1.0+probas(1,nbExemples-1))/2;
+    std::cout << "Voici le résultat final : " << I << std::endl;
 }
 
 Apprentissage::TrainSet::~TrainSet()
 {
-    if(m_save)
-        save();
+    /// destructeur de type ///
     delete[] m_nbNeuron;
     delete[] m_learningRate;
     delete m_sortieAttendue;
@@ -399,6 +403,7 @@ Apprentissage::TrainSet::~TrainSet()
 
 void Apprentissage::TrainSet::init(Database const* data, int *nbLayer, int **nbNeuron, double **learningRate, int *miniBatchSize, int *nbEpoch, double *lambdaL1, double *lambdaL2, CostFunction *costFunction, ActFunction **actFunction,bool *stop,bool save, int id, std::string saveAddress)
 {
+    /// initialise un entraînement ///
     m_stop=stop;
     m_save=save;
     m_id=id;
@@ -423,36 +428,36 @@ void Apprentissage::TrainSet::init(Database const* data, int *nbLayer, int **nbN
     m_error=new Eigen::MatrixXd[m_nbLayer];
     m_neuralNetwork=new NeuralNetwork(m_nbLayer,m_nbNeuron,m_actFunction,m_miniBatchSize,m_save,saveAddress+"neuralNetwork"+intToString(id));
     for(int i{0};i<m_nbLayer;i++)
+    {
         m_error[i]=m_neuralNetwork->m_layer[i];
-
+    }
 }
 
 double Apprentissage::TrainSet::validation()
 {
-
+    /// renvoie un indicateur du taux de réussite ///
     int miniBatchSize=m_miniBatchSize;
     resizeMiniBatch(*m_nbValidationExemple);
     m_data->loadValidationInput(m_neuralNetwork->m_layer[0],*m_sortieAttendue);
     m_neuralNetwork->calcul();
     //double valid{(*m_costFunction)(m_neuralNetwork->m_layer[m_nbLayer-1],*m_sortieAttendue)};
     Eigen::MatrixXd probasValidation(2, *m_nbValidationExemple);
-    //std::cout << "problème dans le calcul de l'erreur" << std::endl;
     double valid = calculErreur(probasValidation, *m_nbValidationExemple);
-    //std::cout << "problème plus tard" << std::endl;
     m_validationScore=valid;
     resizeMiniBatch(miniBatchSize);
-    //std::cout << "sortie de valid" << std::endl;
     return valid;
 }
 
 void  Apprentissage::TrainSet::setSave(bool save)
 {
+    /// indique la sauvegrade d'un entraînement ///
     m_save=save;
     m_neuralNetwork->m_save=save;
 }
 
 void Apprentissage::TrainSet::trainNetwork()
 {
+    /// entraîne un réseau ///
     for(int j{0};j<m_nbEpoch&&!*m_stop&&!earlyStopping();j++)
     {
         for(int k{0};k<*m_nbTrainingExemple;k+=m_miniBatchSize)
@@ -466,11 +471,11 @@ void Apprentissage::TrainSet::trainNetwork()
         if (j%20==0)
             std::cout<<"set "<<m_id<<" epoch "<<j<<std::endl;
     }
-    //std::cout << "sortie de trainNetwork" << std::endl;
 }
 
 void Apprentissage::TrainSet::feedForward()
 {
+    /// calcule l'erruer dans les couches intermédiaires ///
     for(int j{1};j<m_nbLayer;j++)
     {
         m_error[j]=(m_neuralNetwork->m_weight[j]*m_neuralNetwork->m_layer[j-1]).colwise()+m_neuralNetwork->m_bias[j];
@@ -480,19 +485,20 @@ void Apprentissage::TrainSet::feedForward()
 
 void Apprentissage::TrainSet::calculOutputError()
 {
+    /// calcule l'erreur dans dernière couche ///
     m_error[m_nbLayer-1]=m_actFunction[m_nbLayer-1]->prime(m_error[m_nbLayer-1]).cwiseProduct(m_costFunction->gradient(m_neuralNetwork->m_layer[m_nbLayer-1],*m_sortieAttendue));
 }
 
 void Apprentissage::TrainSet::backpropagation()
 {
+    /// réalise la rétropropagatoin ///
     for(int j{m_nbLayer-2};j>0;j--)
-    {
          m_error[j]=m_actFunction[j]->prime(m_error[j]).cwiseProduct(m_neuralNetwork->m_weight[j+1].transpose()*m_error[j+1]);
-    }
 }
 
 void Apprentissage::TrainSet::gradientDescend()
 {
+    /// réalise la descente du gradient ///
     for(int j{m_nbLayer-1};j>0;j--)
     {
         m_neuralNetwork->m_bias[j]-=(m_learningRate[j]/m_miniBatchSize)*m_error[j].rowwise().sum();
@@ -504,12 +510,11 @@ void Apprentissage::TrainSet::gradientDescend()
 
 void Apprentissage::TrainSet::resizeMiniBatch(int miniBatchSize)
 {
+    /// adapte la taille en fonction du nombre d'exemple sélectionnés ///
     m_miniBatchSize=miniBatchSize;
-    std::cout << "entree dans la boucle " << std::endl;
     for(int i{0};i<m_nbLayer;i++)
     {
         m_error[i].resize(m_error[i].rows(),m_miniBatchSize);
-        std::cout << "milieu de la boucle " << std::endl;
         m_neuralNetwork->m_layer[i].resize(m_neuralNetwork->m_layer[i].rows(),m_miniBatchSize);
     }
     m_sortieAttendue->resize(m_sortieAttendue->rows(),m_miniBatchSize);
@@ -517,11 +522,14 @@ void Apprentissage::TrainSet::resizeMiniBatch(int miniBatchSize)
 
 bool Apprentissage::TrainSet::earlyStopping()
 {
+    /// termine prématurément ///
     return 0;
 }
 
 void Apprentissage::TrainSet::save()
 {
+    /// enregistre les données d'un entraînement ///
+    std::cout << m_saveAddress << std::endl;
     std::ofstream file(m_saveAddress+".txt", std::ios::out | std::ios::trunc);
     if(file)
     {
@@ -551,17 +559,19 @@ void Apprentissage::TrainSet::save()
 
 double Apprentissage::TrainSet::calculErreur(Eigen::MatrixXd probas, int nbExemples)
 {
-    //std::cout << "problème dans m_ouputSize" << std::endl;
+    /// calcule l'intégrale de la courbe ROC pour les données d'un entraînement ///
     int m_outputSize = (*m_sortieAttendue).rows();
+    std::cout << m_sortieAttendue->col(1) << std::endl << std::endl;
+    std::cout << (m_neuralNetwork->m_layer[m_nbLayer-1]).col(1) << std::endl << std::endl;
     for (int id{0} ; id < nbExemples; id++)
     {
         double true_negative{0};
         double true_positive{0};
         double false_negative{0};
         double false_positive{0};
-        for(int i{0}; i< m_outputSize; i++)//avant : m_outputSize * m_nbTestExemple
+        for(int i{0}; i< m_outputSize; i++)
         {
-            if((*m_sortieAttendue)(i, id) == 0)//normalement c'est un entier mais il faut voir si ça ne cause aucun problème
+            if((*m_sortieAttendue)(i, id) == 0)
             {
                 if((m_neuralNetwork->m_layer[m_nbLayer-1])(i, id) <= 0.5)
                     true_negative +=1;
@@ -576,23 +586,29 @@ double Apprentissage::TrainSet::calculErreur(Eigen::MatrixXd probas, int nbExemp
                     false_negative +=1;
             }
         }
-        probas(0,id) = true_positive / (true_positive + false_negative); //true_positive_rate
-        probas(1,id) = false_positive / (true_negative + false_positive); //false_discovery_rate
+        if (true_positive+false_negative == 0)
+            probas(0,id) = 0.0;
+        else
+            probas(0,id) = true_positive / (true_positive + false_negative); //true_positive_rate
+        if (true_negative+false_positive == 0)
+            probas(1,id) = 0.0;
+        else
+            probas(1,id) = false_positive / (true_negative + false_positive); //false_discovery_rate
     }
-    //std::cout << "problème dans le tri rapide" << std::endl;
     triRapide(probas, 0, nbExemples -1);//le tri est sur place
     //calcul de l'intégrale de la receiver operating characteristic
     double I{0.0};
-    //std::cout << "problème dans le calcul de l'intégrale" << std::endl;
     for(int k{0}; k< nbExemples-1; k++)
     {
         I  += (probas(0,k+1) - probas(0,k))*(probas(1,k+1) + probas(1,k))/2;
     }
-    return I+(1.0 - probas(0, nbExemples))*(1.0+probas(1,nbExemples))/2;
+    I+= (1.0 - probas(0, nbExemples-1))*(1.0+probas(1,nbExemples-1))/2;
+    return I;
 }
 
 void Apprentissage::TrainSet::triRapide(Eigen::MatrixXd t, int i, int j)
 {
+    /// réalise un tri rapide sur place de la matrice t en fonction de sa première ligne ///
     if(i+1 < j)
     {
         int a = segmente(t, i, j);
@@ -603,6 +619,7 @@ void Apprentissage::TrainSet::triRapide(Eigen::MatrixXd t, int i, int j)
 
 int Apprentissage::TrainSet::segmente(Eigen::MatrixXd t, int i, int j)
 {
+    /// segmente la matrice t entre les indices i et j récursivement ///
     double pivot = t(0,j-1);
     int a = i;
     for(int b{i}; b<j-1 ; b++)
@@ -619,6 +636,8 @@ int Apprentissage::TrainSet::segmente(Eigen::MatrixXd t, int i, int j)
 
 void Apprentissage::copie(Eigen::MatrixXd matrice, const Eigen::MatrixXd matConst)
 {
+    /// copie une matrice constante en une matrice non constante ///
+    // cette fonction n'est pas utilisée finalement
     for (int i{0}; i< matConst.rows(); i++)
     {
         for (int j{0}; j< matConst.cols(); j++)
